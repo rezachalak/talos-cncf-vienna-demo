@@ -1,0 +1,14 @@
+# unrelated local project
+/my-talos/
+
+# claude code local state
+/.claude/
+
+# talos secrets & generated machine configs — never commit these
+**/secrets.yaml
+**/talosconfig
+**/controlplane.yaml
+**/worker.yaml
+**/kubeconfig
+kc
+tc

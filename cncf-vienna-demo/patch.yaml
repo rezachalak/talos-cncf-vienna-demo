@@ -1,0 +1,123 @@
+machine:
+    install:
+        disk: /dev/sda
+        image: factory.talos.dev/metal-installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba:v1.13.9
+    network:
+        interfaces:
+            - interface: enp0s3
+              dhcp: true
+              vip:
+                  ip: 10.0.2.100
+    files:
+        - path: /var/lib/kubelet/zot-config.json
+          op: create
+          permissions: 0o644
+          content: |
+              {
+                "distSpecVersion": "1.1.0",
+                "storage": {
+                  "rootDirectory": "/var/lib/registry"
+                },
+                "http": {
+                  "address": "0.0.0.0",
+                  "port": "5000"
+                },
+                "log": {
+                  "level": "info"
+                },
+                "extensions": {
+                  "search": {
+                    "enable": true
+                  },
+                  "ui": {
+                    "enable": true
+                  },
+                  "sync": {
+                    "enable": true,
+                    "registries": [
+                      {
+                        "urls": ["https://registry-1.docker.io"],
+                        "onDemand": true,
+                        "tlsVerify": true,
+                        "content": [{"prefix": "**"}]
+                      },
+                      {
+                        "urls": ["https://ghcr.io"],
+                        "onDemand": true,
+                        "tlsVerify": true,
+                        "content": [{"prefix": "**"}]
+                      },
+                      {
+                        "urls": ["https://registry.k8s.io"],
+                        "onDemand": true,
+                        "tlsVerify": true,
+                        "content": [{"prefix": "**"}]
+                      },
+                      {
+                        "urls": ["https://quay.io"],
+                        "onDemand": true,
+                        "tlsVerify": true,
+                        "content": [{"prefix": "**"}]
+                      }
+                    ]
+                  }
+                }
+              }
+    registries:
+        mirrors:
+            docker.io:
+                endpoints:
+                    - http://10.0.2.100:5000
+            registry.k8s.io:
+                endpoints:
+                    - http://10.0.2.100:5000
+            ghcr.io:
+                endpoints:
+                    - http://10.0.2.100:5000
+            quay.io:
+                endpoints:
+                    - http://10.0.2.100:5000
+    pods:
+        - apiVersion: v1
+          kind: Pod
+          metadata:
+              name: zot
+              namespace: kube-system
+              labels:
+                  app: zot
+          spec:
+              hostNetwork: true
+              containers:
+                  - name: zot
+                    image: ghcr.io/project-zot/zot:latest
+                    ports:
+                        - name: http
+                          containerPort: 5000
+                          hostPort: 5000
+                    securityContext:
+                        runAsUser: 0
+                    volumeMounts:
+                        - name: data
+                          mountPath: /var/lib/registry
+                        - name: config
+                          mountPath: /etc/zot/config.json
+                          readOnly: true
+              volumes:
+                  - name: data
+                    hostPath:
+                        path: /var/mnt/data
+                        type: Directory
+                  - name: config
+                    hostPath:
+                        path: /var/lib/kubelet/zot-config.json
+                        type: File
+cluster:
+    allowSchedulingOnControlPlanes: true
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: data
+provisioning:
+  diskSelector:
+    match: disk.dev_path == '/dev/sdb'
+  minSize: 1GB
