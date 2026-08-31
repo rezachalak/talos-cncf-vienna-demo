@@ -113,6 +113,78 @@ machine:
                         type: File
 cluster:
     allowSchedulingOnControlPlanes: true
+    inlineManifests:
+        - name: flux-installer-rbac
+          contents: |
+              apiVersion: v1
+              kind: ServiceAccount
+              metadata:
+                name: flux-installer
+                namespace: kube-system
+              ---
+              apiVersion: rbac.authorization.k8s.io/v1
+              kind: ClusterRoleBinding
+              metadata:
+                name: flux-installer
+              roleRef:
+                apiGroup: rbac.authorization.k8s.io
+                kind: ClusterRole
+                name: cluster-admin
+              subjects:
+                - kind: ServiceAccount
+                  name: flux-installer
+                  namespace: kube-system
+        - name: flux-installer-job
+          contents: |
+              apiVersion: batch/v1
+              kind: Job
+              metadata:
+                name: flux-installer
+                namespace: kube-system
+              spec:
+                backoffLimit: 2
+                activeDeadlineSeconds: 600
+                template:
+                  spec:
+                    serviceAccountName: flux-installer
+                    restartPolicy: Never
+                    containers:
+                      - name: install
+                        image: alpine/helm:3.16.2
+                        command: ["/bin/sh", "-c"]
+                        args:
+                          - |
+                            helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
+                            helm repo update
+                            helm upgrade --install flux2 fluxcd-community/flux2 \
+                              --namespace flux-system --create-namespace \
+                              --wait --timeout 5m
+        - name: flux-apps-source
+          contents: |
+              apiVersion: source.toolkit.fluxcd.io/v1
+              kind: OCIRepository
+              metadata:
+                name: apps
+                namespace: flux-system
+              spec:
+                interval: 1m
+                url: oci://10.0.2.100:5000/apps
+                ref:
+                  tag: latest
+                insecure: true
+              ---
+              apiVersion: kustomize.toolkit.fluxcd.io/v1
+              kind: Kustomization
+              metadata:
+                name: apps
+                namespace: flux-system
+              spec:
+                interval: 5m
+                sourceRef:
+                  kind: OCIRepository
+                  name: apps
+                path: "./"
+                prune: true
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig

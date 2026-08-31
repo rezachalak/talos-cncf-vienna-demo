@@ -1,0 +1,9 @@
+machine:
+    install:
+        disk: /dev/sda
+    network:
+        interfaces:
+            - interface: enp0s3
+              dhcp: true
+              vip:
+                  ip: 10.0.2.100
