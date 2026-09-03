@@ -167,7 +167,7 @@ cluster:
                 name: apps
                 namespace: flux-system
               spec:
-                interval: 1m
+                interval: 5s
                 url: oci://172.20.10.10:5000/apps
                 ref:
                   tag: latest
@@ -179,7 +179,7 @@ cluster:
                 name: apps
                 namespace: flux-system
               spec:
-                interval: 5m
+                interval: 5s
                 sourceRef:
                   kind: OCIRepository
                   name: apps
