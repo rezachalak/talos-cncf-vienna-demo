@@ -7,7 +7,7 @@ machine:
             - interface: enp0s3
               dhcp: true
               vip:
-                  ip: 172.20.10.100
+                  ip: 172.20.10.10
     files:
         - path: /var/lib/kubelet/zot-config.json
           op: create
@@ -67,16 +67,16 @@ machine:
         mirrors:
             docker.io:
                 endpoints:
-                    - http://172.20.10.100:5000
+                    - http://172.20.10.10:5000
             registry.k8s.io:
                 endpoints:
-                    - http://172.20.10.100:5000
+                    - http://172.20.10.10:5000
             ghcr.io:
                 endpoints:
-                    - http://172.20.10.100:5000
+                    - http://172.20.10.10:5000
             quay.io:
                 endpoints:
-                    - http://172.20.10.100:5000
+                    - http://172.20.10.10:5000
     pods:
         - apiVersion: v1
           kind: Pod
@@ -168,7 +168,7 @@ cluster:
                 namespace: flux-system
               spec:
                 interval: 1m
-                url: oci://172.20.10.100:5000/apps
+                url: oci://172.20.10.10:5000/apps
                 ref:
                   tag: latest
                 insecure: true
