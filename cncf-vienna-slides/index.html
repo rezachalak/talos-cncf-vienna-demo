@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Immutable, Minimal, Mighty — Talos on Bare Metal</title>
+<title>Talos: Immutable, Minimal, Mighty</title>
 
 <!-- Fonts: Chakra Petch (technical display) + JetBrains Mono (spec-sheet body/labels) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -235,6 +235,9 @@ h2.slide-title {
 .title-wrap { position: absolute; left: 120px; top: 270px; width: 1560px; }
 .title-wrap h1 { font-family: var(--font-display); font-weight: 700; font-size: 118px; line-height: 1.03; letter-spacing: 0.005em; color: var(--ink); }
 .title-wrap h1 .accent { color: var(--cyan); }
+/* "Talos:" leads the title on its own line, set smaller so the three-word
+   promise underneath still carries the slide */
+.title-wrap h1 .lead { display: block; font-size: 58px; line-height: 1.05; color: var(--cyan); letter-spacing: 0.02em; margin-bottom: 10px; }
 .dim-line { position: relative; width: 1040px; height: 34px; margin: 36px 0 34px 4px; }
 .dim-line::before { content: ''; position: absolute; left: 0; right: 0; top: 16px; height: 1px; background: var(--dim-2); }
 .dim-line::after { content: '12 BINARIES · 0 SHELL · 1 PURPOSE'; position: absolute; left: 50%; top: 0; transform: translateX(-50%); background: var(--bg); padding: 0 18px; font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.14em; color: var(--amber); }
@@ -321,7 +324,7 @@ h2.slide-title {
         <span>03.09.2026</span>
       </div>
       <div class="chrome-bottom">
-        <span class="credit"><b>Reza Chalak</b> — Immutable, Minimal, Mighty</span>
+        <span class="credit"><b>Reza Chalak</b> — Talos: Immutable, Minimal, Mighty</span>
         <span id="pageIndicator"></span>
       </div>
     </div>
@@ -332,7 +335,7 @@ h2.slide-title {
       <div class="stamp">READ-ONLY ROOTFS</div>
       <div class="spec-line reveal d1"><span class="rule"></span> TALOS LINUX &middot; SPEC SHEET</div>
       <div class="title-wrap">
-        <h1 class="reveal d2">Immutable, Minimal,<br><span class="accent">Mighty.</span></h1>
+        <h1 class="reveal d2"><span class="lead">Talos:</span>Immutable, Minimal,<br><span class="accent">Mighty.</span></h1>
         <div class="dim-line reveal d3"><span class="cap l"></span><span class="cap r"></span></div>
         <div class="title-sub reveal d4">Running Kubernetes on Bare Metal with Talos</div>
       </div>
