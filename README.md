@@ -1,5 +1,10 @@
 # talos-cncf-vienna-demo
 
+**Talos: Immutable, Minimal, Mighty** — running Kubernetes on bare metal with Talos.
+CNCF Vienna Meetup, 3 September 2026 · Reza Chalak, DevOps Engineer at ProLion.
+
+📊 **Slides: <https://rezachalak.site/talos-cncf-vienna-sep-2026>**
+
 A one-(or two-)node Talos Kubernetes cluster running in VirtualBox, wired up
 as a self-contained GitOps demo for a CNCF Vienna talk: Talos boots, brings
 up its own container registry ([zot](https://zotregistry.dev)), installs
@@ -17,6 +22,10 @@ whole demo lives on your laptop.
 - `cncf-vienna-demo/patch.yaml` — stage 2, the full demo: everything below.
 - `apps/` — a small [podinfo](https://github.com/stefanprodan/podinfo)
   deployment, meant to be pushed to `zot` as the OCI artifact Flux reconciles.
+- `run-sheet.sh` — the live-demo run sheet: every command of the walkthrough in
+  order, to copy line by line on stage. See "Running from the run sheet" below —
+  it is a script to read, not one to execute.
+- `cncf-vienna-slides/` — the talk deck, deployed to the slides link above.
 
 ## What `patch.yaml` actually sets up
 
@@ -130,6 +139,42 @@ flux reconcile source oci apps -n flux-system
 flux reconcile kustomization apps -n flux-system
 ```
 
+## Running from the run sheet
+
+`run-sheet.sh` is the same walkthrough as the Quick start above, condensed into
+the exact order it gets performed on stage — plus the read-only `talosctl` calls
+the talk uses to show that a Talos node is inspectable without ever opening a
+shell:
+
+```bash
+talosctl get services      # what's running, per the machine config
+talosctl get extensions    # what the Factory image actually shipped
+talosctl get disks         # and get mounts / usage --humanize /var/mnt/
+talosctl etcd status
+talosctl edit machineconfig
+```
+
+It also carries the `talosctl upgrade` line, pointed at a Factory installer
+image — the A/B partition upgrade, done through the API rather than a package
+manager.
+
+**Read it, don't run it.** Despite the `.sh`, it is a run sheet rather than an
+executable: it hardcodes a VIP and both DHCP addresses that you have to replace
+with your own (see "Picking your VIP"), the two node addresses can only be read
+off the VM consoles *after* they boot, and `talosctl edit machineconfig` opens
+an interactive editor. Run it top to bottom unattended and it will apply configs
+to addresses that aren't yours.
+
+Run the commands from `cncf-vienna-demo/` — `./create-vm.sh` and `@patch.yaml`
+are both relative to that directory.
+
+> **⚠️ One line in it will bite you:** the final
+> `flux push artifact` uses `--path="../apps"`, which is exactly the trap
+> documented above. From `cncf-vienna-demo/` that push lands an artifact entry
+> literally named `../apps`, Flux refuses to extract it, and the demo silently
+> keeps serving the previous state. Before the talk, either run that last command
+> from the repo root with `--path="./apps"`, or fix the line in place.
+
 ## Gotchas we hit building this
 
 - **`machine.network.hostname` vs. `HostnameConfig`.** `talosctl gen config`
@@ -168,6 +213,43 @@ flux reconcile kustomization apps -n flux-system
   on the same interface. Bridged networking sidesteps all of that (the VM
   just has a real, directly-reachable address) at the cost of needing a VIP
   that actually fits your current network, per the section above.
+
+## Slides
+
+**<https://rezachalak.site/talos-cncf-vienna-sep-2026>**
+
+One self-contained HTML file — a fixed 1920×1080 stage scaled to the viewport,
+with no build step, no framework and no runtime dependencies. Open
+`cncf-vienna-slides/talos-cncf-vienna-sep-2026/index.html` in a browser and it
+works offline, projector included.
+
+- **Navigate** with arrow keys, click, scroll or swipe. Items on a slide reveal
+  one at a time before it advances, so a presentation remote drives the builds
+  as well as the slides. Arrow-left walks back through them; the dots jump
+  straight to a slide fully built.
+- **Edit** in place: press `E` (or click the top-left corner) to toggle inline
+  editing. Changes autosave to `localStorage`; `Ctrl`/`Cmd`+`S` exports the
+  edited deck as a standalone HTML file.
+
+### How it's deployed
+
+Vercel serves the project's Root Directory (`cncf-vienna-slides`) from `/`, so
+the URL path is just the folder layout — the deck sits one level down, which is
+what puts it at `/talos-cncf-vienna-sep-2026`:
+
+```
+cncf-vienna-slides/                  ← Vercel Root Directory, served at /
+├── vercel.json
+└── talos-cncf-vienna-sep-2026/      ← served at /talos-cncf-vienna-sep-2026
+    ├── index.html
+    └── assets/
+```
+
+`vercel.json` sets `trailingSlash` so the directory form resolves and the
+relative `assets/…` references keep working. Every push to `main` redeploys.
+
+`/` is deliberately left alone — the site root is served from a separate
+repository, so this project only ever owns its own subpath.
 
 ## Roadmap
 
