@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/talos-cncf-vienna-sep-2026",
+      "permanent": false
+    }
+  ]
+}
